@@ -2,10 +2,11 @@
 \alias{lproj}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Local Projection
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+The lproj function allows to compute standard Jorda (2005) local projections
+as well as Barnichorn and Brownlees (2016) smooth local projection estimators.
 }
 \usage{
 lproj()

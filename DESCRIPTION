@@ -1,9 +1,10 @@
 Package: lproj
 Type: Package
-Title: What the package does (short line)
+Title: Local Projections
 Version: 1.0
 Date: 2017-10-30
 Author: Christian Brownlees 
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Maintainer: Christian Brownlees <christian.brownlees@upf.edu>
 Description: More about what it does (maybe more than one line)
+Depends: splines, Matrix
 License: What license is it under?

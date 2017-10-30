@@ -1,1 +1,3 @@
+import(splines)
+import(Matrix)
 exportPattern("^[[:alpha:]]+")
