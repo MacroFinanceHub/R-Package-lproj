@@ -10,7 +10,7 @@ lagmatrix <- function( X , lag ){
 } 
 
 #
-lproj <- function( y , x , w=NULL , const=TRUE , type='reg' , H , h1 , r=0 , zero=FALSE , lambda=0 ){
+lproj <- function( y , x , w=NULL , const=TRUE , type='reg' , H , h1 , r=0 , zero=FALSE , lambda=0, trace=1 ){
   
   # dimensions
   T   <- length(y)
@@ -122,7 +122,7 @@ lproj <- function( y , x , w=NULL , const=TRUE , type='reg' , H , h1 , r=0 , zer
   mul   <- matrix(0,HR,length(lambda))
   
   for( i in 1:length(lambda) ){
-    cat('.')
+    if (trace==1) {cat('.')}
     A         <- XX + lambda[i]*TS*P 
     b         <- XY
     theta[,i] <- as.vector( Matrix::solve( A , b ) )
@@ -137,7 +137,7 @@ lproj <- function( y , x , w=NULL , const=TRUE , type='reg' , H , h1 , r=0 , zer
     
     ir[(h1+1):(H+1),i]   <- mul[,i]*delta
   }
-  cat('\n')
+  if (trace==1) {cat('\n')}
   
   obj <- list()
   obj$type<- type
@@ -215,7 +215,7 @@ lproj.conf <- function( obj , l=1 ){
   obj
 }
 
-lproj.cv <- function( obj , K ){
+lproj.cv <- function( obj , K, trace=1 ){
   
   T   <- obj$T
   L   <- length(obj$lambda)
@@ -224,7 +224,7 @@ lproj.cv <- function( obj , K ){
   rss <- rep(0,L)
   
   for( l in 1:L ){
-    cat('.')
+    if (trace==1) {cat('.')}
     
     rss.l <- rep(0, K)
     
@@ -248,7 +248,7 @@ lproj.cv <- function( obj , K ){
     
     rss[l] <- mean(rss.l)
   }
-  cat('\n')
+  if (trace==1) {cat('\n')}
   
   obj$rss     <- rss
   obj$idx.opt <- tail(which(min(rss)==rss),1)
