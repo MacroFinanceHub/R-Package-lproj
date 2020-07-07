@@ -15,6 +15,9 @@ lproj <- function( y , x , w=NULL , const=TRUE , type='reg' , H , h1 , r=0 , zer
   # dimensions
   T   <- length(y)
   
+  # check
+  x <- as.matrix(x)
+  
   # construct basis
   if( type=='smooth' ){
     h.range <- h1:H
