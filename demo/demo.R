@@ -25,3 +25,4 @@ ir.smooth   <- lproj.cv( ir.smooth , 5 )
 
 matplot( cbind(ir.regular$ir,ir.smooth$ir.opt) , t='l' )
 abline(h=0)
+

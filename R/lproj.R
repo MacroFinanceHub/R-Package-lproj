@@ -14,6 +14,9 @@ lproj <- function( y , x , w=NULL , const=TRUE , type='reg' , H , h1 , r=0 , zer
   
   # dimensions
   T   <- length(y)
+
+  # check
+  x <- as.matrix(x)
   
   # construct basis
   if( type=='smooth' ){
@@ -176,11 +179,11 @@ lproj.conf <- function( obj , l=1 ){
   bread <- solve( t(obj$X)%*%obj$X + obj$lambda[l]*obj$TS*obj$P )
   
   # MEAT
-  nlag    = min(floor(1.2*(obj$T)**(1/3)),obj$T)
-  nlag    = obj$H
+  #nlag    = min(floor(1.2*(obj$T)**(1/3)),obj$T)
+  nlag    = obj$H+1
   weights = (nlag+1-(0:nlag))/(nlag+1)
   V <- t(S) %*% S
-  for( i in 1:nlag ){
+  for( i in 0:nlag ){
     Gammai      <- t( S[(i+1):obj$T,] ) %*% S[1:(obj$T-i),]
     GplusGprime <- Gammai+t(Gammai)
     V           <- V+weights[i+1]*GplusGprime
@@ -193,16 +196,16 @@ lproj.conf <- function( obj , l=1 ){
   if( obj$type == 'reg' ){
     se   <- sqrt( diag( V[ 1:(obj$H+1-obj$h1) , 1:(obj$H+1-obj$h1) ] ) )
     conf <- matrix( 0 , length(se) , 2 )
-    conf[,1] <- obj$mul[,l] + se*qnorm(0.10)      
-    conf[,2] <- obj$mul[,l] + se*qnorm(0.90)      
+    conf[,1] <- obj$mul[,l] + se*qnorm(0.05)      
+    conf[,2] <- obj$mul[,l] + se*qnorm(0.95)      
     
   }
   else{
     V    <- as.matrix(obj$basis) %*% V[ 1:obj$XS , 1:obj$XS ] %*% t(as.matrix(obj$basis))
     se   <- sqrt( diag( V ) )
     conf <- matrix( 0 , length(se) , 2 )
-    conf[,1] <- obj$mul[,l] + se*qnorm(0.10)      
-    conf[,2] <- obj$mul[,l] + se*qnorm(0.90)      
+    conf[,1] <- obj$mul[,obj$idx.opt] + se*qnorm(0.05)
+    conf[,2] <- obj$mul[,obj$idx.opt] + se*qnorm(0.95)
     #conf[nrow(conf),] <- NA
   }
   
@@ -214,6 +217,62 @@ lproj.conf <- function( obj , l=1 ){
   
   obj
 }
+
+lproj.conf2 <- function( obj , l=1 ){
+  
+  u <- obj$Y - obj$X %*% obj$theta[,l];    
+  S <- obj$X * ( u %*% t(rep(1,ncol(obj$X))) )
+  
+  # BREAD
+  bread <- solve( t(obj$X)%*%obj$X + obj$lambda[l]*obj$TS*obj$P )
+  
+  # MEAT
+  #nlag    = min(floor(1.2*(obj$T)**(1/3)),obj$T)
+  nlag    = obj$H+1
+
+  weights = rep(0,obj$T)
+  weights[1:(nlag+1)] = (nlag+1-(0:nlag))/(nlag+1)
+  weights[1] = 1/2
+  
+  V <- matrix( 0 , ncol(S) , ncol(S) )
+  for( i in 1:T ){
+    for( j in 1:T ){
+    l           <- 1+abs(obj$idx[i]-obj$idx[j]) 
+    Gammai      <- t( S[i,] ) %*% S[j,]
+    GplusGprime <- Gammai+t(Gammai)
+    V           <- V+weights[l]*GplusGprime
+    }
+  }
+  
+  meat <- V
+  
+  V  <- bread %*% meat %*% bread
+  
+  if( obj$type == 'reg' ){
+    se   <- sqrt( diag( V[ 1:(obj$H+1-obj$h1) , 1:(obj$H+1-obj$h1) ] ) )
+    conf <- matrix( 0 , length(se) , 2 )
+    conf[,1] <- obj$mul[,l] + se*qnorm(0.05)      
+    conf[,2] <- obj$mul[,l] + se*qnorm(0.95)      
+    
+  }
+  else{
+    V    <- as.matrix(obj$basis) %*% V[ 1:obj$XS , 1:obj$XS ] %*% t(as.matrix(obj$basis))
+    se   <- sqrt( diag( V ) )
+    conf <- matrix( 0 , length(se) , 2 )
+    conf[,1] <- obj$mul[,obj$idx.opt] + se*qnorm(0.05)
+    conf[,2] <- obj$mul[,obj$idx.opt] + se*qnorm(0.95)
+    #conf[nrow(conf),] <- NA
+  }
+  
+  irc <- matrix(NA,obj$H+1,2)
+  irc[(1+obj$h1):(obj$H+1),] <- conf*obj$delta
+  
+  obj$se  <- se
+  obj$irc <- irc
+  
+  obj
+}
+
 
 lproj.cv <- function( obj , K ){
   
